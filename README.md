@@ -1,12 +1,18 @@
 # Uses Permission Analyzer
 
-![Bash](https://img.shields.io/badge/Bash-Script-green)
 ![Android](https://img.shields.io/badge/Android-APK-blue)
+![Bash](https://img.shields.io/badge/Bash-Script-green)
+![PowerShell](https://img.shields.io/badge/PowerShell-Script-blue?logo=powershell)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 
 ## Описание
 
-`uses-permission.sh` — это bash-скрипт для анализа Android APK-файлов. Скрипт автоматически извлекает список разрешений из манифеста приложения и проверяет наличие потенциально нежелательных пермишенов.
+Утилита для анализа Android APK-файлов. Автоматически извлекает список разрешений из манифеста приложения и проверяет наличие потенциально нежелательных пермишенов.
+
+| Скрипт | Платформа |
+|--------|-----------|
+| `uses-permission.sh` | Linux / macOS |
+| `uses-permission.ps1` | Windows |
 
 ## Возможности
 
@@ -16,11 +22,11 @@
   - `ACCESS_FINE_LOCATION` — доступ к точной геолокации
   - `REQUEST_INSTALL_PACKAGES` — установка пакетов
   - `QUERY_ALL_PACKAGES` — запрос всех установленных приложений
+- **Группировка по категориям** — пермишены сортируются по типу (Location, Camera, Storage и т.д.)
 - **Цветной вывод** — наглядное отображение результатов с эмодзи
 
 ## Требования
 
-- **Bash** 4.0+
 - **apktool** — должен быть доступен в `PATH`
 
 ### Установка apktool
@@ -34,9 +40,14 @@ brew install apktool
 
 # Arch Linux
 sudo pacman -S apktool
+
+# Windows (winget)
+winget install iBotPeaches.Apktool
 ```
 
 ## Использование
+
+### Bash (Linux/macOS)
 
 ```bash
 # Сделать скрипт исполняемым
@@ -46,44 +57,49 @@ chmod +x uses-permission.sh
 ./uses-permission.sh /path/to/your/app.apk
 ```
 
-### Пример вывода
+### PowerShell (Windows)
 
-```
-🚀 Запуск скрипта для разбора приложения: sample.apk
-==============================================
+```powershell
+# Запуск
+.\uses-permission.ps1 C:\path\to\your\app.apk
 
-⚒️ Разбираем приложение во временную директорию...
+# Только нежелательные пермишены
+.\uses-permission.ps1 C:\path\to\your\app.apk -ShowUnwanted
 
-📋 Пермишены приложения:
---------------------------------------
-  - android.permission.INTERNET
-  - android.permission.ACCESS_NETWORK_STATE
-  - android.permission.CAMERA
-  - android.permission.ACCESS_FINE_LOCATION
---------------------------------------
-
-🔍 Проверка на нежелательные пермишены...
-🚨 Найдены нежелательные пермишены:
-  - android.permission.ACCESS_FINE_LOCATION
---------------------------------------
-
-✅ Готово!
+# Без цветного вывода
+.\uses-permission.ps1 C:\path\to\your\app.apk -NoColor
 ```
 
-## Структура скрипта
+## Пример вывода
 
 ```
-uses-permission.sh
-├── Конфигурация цветов
-├── Функции:
-│   ├── die() — вывод ошибок и завершение
-│   └── cleanup() — очистка временных файлов
-└── Основная логика:
-    ├── Проверка зависимостей
-    ├── Валидация входного файла
-    ├── Декомпиляция APK
-    ├── Извлечение пермишенов
-    └── Проверка на нежелательные пермишены
+  Запуск анализа приложения: sample.apk
+  ======================================
+
+  Разбор приложения...
+
+  Пермишены приложения: (4 шт.)
+  --------------------------------------
+
+  [Network] (2)
+    - android.permission.INTERNET
+    - android.permission.ACCESS_NETWORK_STATE
+
+  [Camera] (1)
+    - android.permission.CAMERA
+
+  [Location] (1)
+    !! android.permission.ACCESS_FINE_LOCATION
+
+  --------------------------------------
+
+  Проверка на нежелательные пермишены...
+
+  Найдены нежелательные пермишены: (1)
+    !! android.permission.ACCESS_FINE_LOCATION
+  --------------------------------------
+
+  Готово!
 ```
 
 ## Как это работает
@@ -100,10 +116,6 @@ uses-permission.sh
 - Временные файлы автоматически удаляются после завершения скрипта
 - Скрипт корректно обрабатывает прерывание (Ctrl+C)
 - Все ошибки выводятся на stderr с красным выделением
-
-## Автор
-
-Создан для анализа безопасности Android-приложений
 
 ## Лицензия
 
