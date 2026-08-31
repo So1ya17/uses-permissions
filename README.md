@@ -1,18 +1,20 @@
 # Uses Permission Analyzer
 
 ![Android](https://img.shields.io/badge/Android-APK-blue)
+![iOS](https://img.shields.io/badge/iOS-Plist-lightgrey?logo=apple)
 ![Bash](https://img.shields.io/badge/Bash-Script-green)
 ![PowerShell](https://img.shields.io/badge/PowerShell-Script-blue?logo=powershell)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 
 ## Описание
 
-Утилита для анализа Android APK-файлов. Автоматически извлекает список разрешений из манифеста приложения и проверяет наличие потенциально нежелательных пермишенов.
+Утилиты для анализа разрешений мобильных приложений. Поддерживаются Android APK-файлы и iOS .app-бандлы.
 
-| Скрипт | Платформа |
-|--------|-----------|
-| `uses-permission.sh` | Linux / macOS |
-| `uses-permission.ps1` | Windows |
+| Скрипт | Платформа | Назначение |
+|--------|-----------|------------|
+| `uses-permission.sh` | Linux / macOS | Анализ пермишенов Android APK |
+| `uses-permission.ps1` | Windows | Анализ пермишенов Android APK |
+| `extract_permissions.ps1` | Windows | Извлечение privacy-ключей из iOS Info.plist |
 
 ## Возможности
 
@@ -25,9 +27,17 @@
 - **Группировка по категориям** — пермишены сортируются по типу (Location, Camera, Storage и т.д.)
 - **Цветной вывод** — наглядное отображение результатов с эмодзи
 
+### iOS (extract_permissions.ps1)
+
+- **Извлечение privacy-ключей** — парсинг `Info.plist` для поиска всех `NS*UsageDescription` ключей
+- **Поддержка бинарных plist** — автоматическая конвертация через Python (`plistlib`)
+- **Гибкий ввод** — принимает путь к `.app` директории или напрямую к `.plist` файлу
+- **28 известных ключей** — камера, микрофон, геолокация, контакты, Bluetooth, Face ID, HealthKit, NFC и другие
+
 ## Требования
 
-- **apktool** — должен быть доступен в `PATH`
+- **apktool** — должен быть доступен в `PATH` (только для Android-скриптов)
+- **Python 3** — необходим для обработки бинарных plist (только для `extract_permissions.ps1`)
 
 ### Установка apktool
 
@@ -70,7 +80,22 @@ chmod +x uses-permission.sh
 .\uses-permission.ps1 C:\path\to\your\app.apk -NoColor
 ```
 
+### iOS — extract_permissions.ps1 (Windows)
+
+```powershell
+# Указать путь к .app директории (Info.plist найдётся автоматически)
+.\extract_permissions.ps1 "C:\path\to\Runner.app"
+
+# Указать путь напрямую к plist-файлу
+.\extract_permissions.ps1 "C:\path\to\Info.plist"
+
+# По умолчанию ищет Info.plist в текущей директории
+.\extract_permissions.ps1
+```
+
 ## Пример вывода
+
+### Android
 
 ```
   Запуск анализа приложения: sample.apk
@@ -102,7 +127,23 @@ chmod +x uses-permission.sh
   Готово!
 ```
 
+### iOS
+
+```
+Permissions found in: C:\path\to\Runner.app\Info.plist
+================================================================================
+
+Permission                     Value
+----------                     -----
+NSCameraUsageDescription       Используется для съёмки документов
+NSFaceIDUsageDescription       Face ID используется для входа в приложение
+NSMicrophoneUsageDescription   The application does not use this feature
+NSUserTrackingUsageDescription Для персонализации рекламы
+```
+
 ## Как это работает
+
+### Android
 
 1. **Проверка зависимостей** — убедиться, что `apktool` установлен
 2. **Валидация** — проверить существование APK-файла
@@ -110,6 +151,14 @@ chmod +x uses-permission.sh
 4. **Парсинг** — извлечь все `uses-permission` из `AndroidManifest.xml`
 5. **Анализ** — сверить найденные пермишены со списком нежелательных
 6. **Очистка** — удалить временные файлы при завершении
+
+### iOS
+
+1. **Определение пути** — если указана директория `.app`, найти `Info.plist` внутри
+2. **Определение формата** — проверить заголовок файла (`bplist` = бинарный)
+3. **Конвертация** — если бинарный plist, сконвертировать в XML через Python
+4. **Парсинг** — сопоставить ключи со списком известных privacy-ключей
+5. **Вывод** — отобразить найденные ключи и их описания в таблице
 
 ## Примечания
 
